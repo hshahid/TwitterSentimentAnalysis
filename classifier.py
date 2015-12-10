@@ -15,17 +15,33 @@ for (words, sentiment) in pos_tweets + neg_tweets:
     words_filtered = [e.lower() for e in words.split() if len(e) >= 3] 
     tweets.append((words_filtered, sentiment))
 
-tweets = [
-    (['love', 'this', 'car'], 'positive'),
-    (['this', 'view', 'amazing'], 'positive'),
-    (['feel', 'great', 'this', 'morning'], 'positive'),
-    (['excited', 'about', 'the', 'concert'], 'positive'),
-    (['best', 'friend'], 'positive'),
-    (['not', 'like', 'this', 'car'], 'negative'),
-    (['this', 'view', 'horrible'], 'negative'),
-    (['feel', 'tired', 'this', 'morning'], 'negative'),
-    (['not', 'looking', 'forward', 'the', 'concert'], 'negative'),
-    (['enemy'], 'negative')]
+def get_words_in_tweets(tweets):
+    all_words = []
+    for (words, sentiment) in tweets:
+      all_words.extend(words)
+    return all_words
 
+def get_word_features(wordlist):
+    wordlist = nltk.FreqDist(wordlist)
+    word_features = wordlist.keys()
+    return word_features
 
+def extract_features(document):
+    document_words = set(document)
+    features = {}
+    for word in word_features:
+        features['contains(%s)' % word] = (word in document_words)
+    return features
+
+def train(labeled_featuresets, estimator=ELEProbDist):
+    ...
+    # Create the P(label) distribution
+    label_probdist = estimator(label_freqdist)
+    ...
+    # Create the P(fval|label, fname) distribution
+    feature_probdist = {}
+    ...
+    return NaiveBayesClassifier(label_probdist, feature_probdist)
+training_set = nltk.classify.apply_features(extract_features, tweets)
+classifier = nltk.NaiveBayesClassifier.train(training_set)
 print tweets
